@@ -1,24 +1,28 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
-import { AppModule } from './../src/app.module';
+import { checkWinner, initialState } from 'src/functional-core/play_functions';
+import { GameState } from 'src/functional-core/types';
 
-describe('AppController (e2e)', () => {
-  let app: INestApplication;
-
-  beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-    await app.init();
+describe('Penalty Shootout', () => {
+  it('should initialize with correct state', () => {
+    expect(initialState).toEqual({
+      scoreA: 0,
+      scoreB: 0,
+      currentRound: 1,
+      shots: [],
+      isFinished: false,
+    });
   });
 
-  it('/ (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/')
-      .expect(200)
-      .expect('Hello World!');
+  it('should detect early winner', () => {
+    const state: GameState = {
+      ...initialState,
+      scoreA: 3,
+      scoreB: 0,
+      currentRound: 3,
+      shots: [],
+    };
+
+    const result = checkWinner(state);
+    expect(result.isFinished).toBe(true);
+    expect(result.winner).toBe('A');
   });
 });
